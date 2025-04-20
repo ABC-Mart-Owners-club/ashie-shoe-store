@@ -2,11 +2,11 @@ package com.abc.mart.order.usecase.dto;
 
 import lombok.Builder;
 
-import java.util.List;
-
+import java.time.LocalDateTime;
 @Builder
 public record CalcuateSalesAmountRequest(
-        String orderId,
+        LocalDateTime from,
+        LocalDateTime to,
         String productId
 ) {
 }

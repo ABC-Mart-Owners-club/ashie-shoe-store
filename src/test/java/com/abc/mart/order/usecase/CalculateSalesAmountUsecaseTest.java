@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 class CalculateSalesAmountUsecaseTest {
@@ -32,28 +33,31 @@ class CalculateSalesAmountUsecaseTest {
 
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
-        var order = Order.createOrder(
+        var order1 = Order.createOrder(
                 List.of(OrderItem.of(products.getFirst(), 10), OrderItem.of(products.getLast(), 3)), customer
         );
+        var order2 = Order.createOrder(
+                List.of(OrderItem.of(products.getFirst(), 7), OrderItem.of(products.getLast(), 2)), customer
+        );
 
-        var now = LocalDateTime.now();
-        var orderId = OrderId.generate(orderMemberId, now);
-        when(orderRepository.findById(orderId)).thenReturn(order);
+        var order3 = Order.createOrder(
+                List.of(OrderItem.of(products.getFirst(), 6), OrderItem.of(products.getLast(), 2)), customer
+        );
+
+        var from = LocalDateTime.now().minusMonths(1);
+        var to = LocalDateTime.now();
+
+        when(orderRepository.findByTerm(any())).thenReturn(List.of(order1, order2, order3));
 
 
         //when
-        var calculateSalesAmountRequest = CalcuateSalesAmountRequest.builder().productId(productId1).orderId(orderId.id()).build();
+        var calculateSalesAmountRequest = CalcuateSalesAmountRequest.builder()
+                .productId(productId1).from(from).to(to).build();
+
         var res = calculateSalesAmountUsecase.calculateSalesAmount(calculateSalesAmountRequest);
 
         //then
-        assertEquals(100000, res);
-
-        //when
-        var calculateSalesAmountRequest2 = CalcuateSalesAmountRequest.builder().productId(productId2).orderId(orderId.id()).build();
-        var res2 = calculateSalesAmountUsecase.calculateSalesAmount(calculateSalesAmountRequest2);
-
-        //then
-        assertEquals(60000, res2);
+        assertEquals(230000, res);
 
     }
 

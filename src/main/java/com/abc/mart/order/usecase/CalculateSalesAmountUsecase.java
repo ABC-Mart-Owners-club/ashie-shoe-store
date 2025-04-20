@@ -1,7 +1,7 @@
 package com.abc.mart.order.usecase;
 
-import com.abc.mart.order.domain.OrderId;
 import com.abc.mart.order.domain.repository.OrderRepository;
+import com.abc.mart.order.domain.repository.OrderSpecification;
 import com.abc.mart.order.usecase.dto.CalcuateSalesAmountRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +12,13 @@ public class CalculateSalesAmountUsecase {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public long calculateSalesAmount(CalcuateSalesAmountRequest request){
-        var order = orderRepository.findById(OrderId.of(request.orderId()));
+    public long calculateSalesAmount(CalcuateSalesAmountRequest request) {
+        var orders = orderRepository.findByTerm(OrderSpecification.between(request.from(), request.to()));
 
-        return order.calculateSalesAmountOfSpecificProduct(request.productId());
+        if (orders.isEmpty()) return 0;
+
+        return orders.stream()
+                .mapToLong(o -> o.calculateSalesAmountOfSpecificProduct(request.productId()))
+                .sum();
     }
 }

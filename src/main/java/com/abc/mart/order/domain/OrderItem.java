@@ -14,7 +14,6 @@ public class OrderItem {
     private String productId;
     private Long orderedPrice; //snapshot of the price when the order was placed
     private int quantity;
-    private long totalPrice;
 
     @Getter
     private OrderState orderState;
@@ -24,7 +23,6 @@ public class OrderItem {
         orderItem.productId = product.getId();
         orderItem.orderedPrice = product.getPrice();
         orderItem.quantity = quantity;
-        orderItem.totalPrice = orderItem.getTotalPrice();
         orderItem.orderState = OrderState.PREPARING;
 
         return orderItem;
