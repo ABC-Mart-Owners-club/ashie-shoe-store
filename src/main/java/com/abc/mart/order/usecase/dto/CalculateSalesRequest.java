@@ -4,7 +4,7 @@ import lombok.Builder;
 
 import java.time.LocalDateTime;
 @Builder
-public record CalcuateSalesAmountRequest(
+public record CalculateSalesRequest(
         LocalDateTime from,
         LocalDateTime to,
         String productId

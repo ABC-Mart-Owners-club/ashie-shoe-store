@@ -3,7 +3,7 @@ package com.abc.mart.order.usecase;
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
-import com.abc.mart.order.usecase.dto.CalcuateSalesAmountRequest;
+import com.abc.mart.order.usecase.dto.CalculateSalesRequest;
 import com.abc.mart.product.domain.Product;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -51,7 +51,7 @@ class CalculateSalesAmountUsecaseTest {
 
 
         //when
-        var calculateSalesAmountRequest = CalcuateSalesAmountRequest.builder()
+        var calculateSalesAmountRequest = CalculateSalesRequest.builder()
                 .productId(productId1).from(from).to(to).build();
 
         var res = calculateSalesAmountUsecase.calculateSalesAmount(calculateSalesAmountRequest);

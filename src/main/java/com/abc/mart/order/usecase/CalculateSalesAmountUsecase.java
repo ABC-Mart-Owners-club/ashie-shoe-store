@@ -2,7 +2,7 @@ package com.abc.mart.order.usecase;
 
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.order.domain.repository.OrderSpecification;
-import com.abc.mart.order.usecase.dto.CalcuateSalesAmountRequest;
+import com.abc.mart.order.usecase.dto.CalculateSalesRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -12,7 +12,7 @@ public class CalculateSalesAmountUsecase {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public long calculateSalesAmount(CalcuateSalesAmountRequest request) {
+    public long calculateSalesAmount(CalculateSalesRequest request) {
         var orders = orderRepository.findByTerm(OrderSpecification.between(request.from(), request.to()));
 
         if (orders.isEmpty()) return 0;
