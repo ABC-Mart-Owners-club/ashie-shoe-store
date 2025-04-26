@@ -46,13 +46,16 @@ public class ProcessPaymentUsecase {
                 throw new RuntimeException("Payment processing failed by payment method " + paymentDetailRequest.paymentMethodType());
             }
 
-            return PaymentDetail.create(selectedPaymentMethod, paymentDetailRequest.payedAmount());
+            return PaymentDetail.create(paymentDetailRequest.paymentMethodType(), paymentDetailRequest.payedAmount());
         }).toList();
 
 
         var paymentHistory = PaymentHistory.create(orderId, paymentRequest.calculateTotalRequestedPaymentAmount(),
                 processedPaymentDetails, LocalDateTime.now(ZoneId.systemDefault()));
         paymentHistoryRepository.save(paymentHistory);
+
+        order.orderGetPaid();
+        orderRepository.save(order);
 
         return paymentHistory;
 

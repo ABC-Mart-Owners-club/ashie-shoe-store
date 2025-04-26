@@ -1,8 +1,7 @@
 package com.abc.mart.payment.usecase;
 
-import com.abc.mart.order.domain.Order;
-import com.abc.mart.order.domain.OrderId;
-import com.abc.mart.order.domain.OrderStatus;
+import com.abc.mart.member.domain.Member;
+import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.payment.domain.PaymentHistory;
 import com.abc.mart.payment.domain.PaymentMethod;
@@ -10,6 +9,7 @@ import com.abc.mart.payment.domain.PaymentProcessState;
 import com.abc.mart.payment.domain.repository.PaymentHistoryRepository;
 import com.abc.mart.payment.infra.*;
 import com.abc.mart.payment.usecase.dto.PaymentRequest;
+import com.abc.mart.product.domain.Product;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -56,19 +56,30 @@ class ProcessPaymentUsecaseTest {
     void processPayment_Success() {
         // given
         var orderId = OrderId.generate("memberId", LocalDateTime.now());
-        var order = mock(Order.class);
-        when(orderRepository.findById(orderId)).thenReturn(order);
-        when(order.getOrderStatus()).thenReturn(OrderStatus.REQUESTED);
-        when(order.calculateTotalPrice()).thenReturn(30000L);
 
-        when(cashPaymentMethod.process(10000L)).thenReturn(PaymentProcessState.APPROVED);
-        when(visaCardPaymentMethod.process(20000L)).thenReturn(PaymentProcessState.APPROVED);
+        var productId1 = "productId1";
+        var productId2 = "productId2";
+        var price1 = 10000;
+        var price2 = 20000;
+
+        var orderMemberId = "memberId";
+        var products = List.of(Product.of(productId1, "productName", price1), Product.of(productId2, "productName", price2));
+        var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
+
+        var order = Order.createOrder(customer);
+        order.setOrderItems(List.of(OrderItem.of(products.getFirst(), 10, order.getOrderId(), 1),
+                OrderItem.of(products.getLast(), 3, order.getOrderId(), 2)));
+
+        when(orderRepository.findById(orderId)).thenReturn(order);
+
+        when(cashPaymentMethod.process(100000L)).thenReturn(PaymentProcessState.APPROVED);
+        when(visaCardPaymentMethod.process(60000L)).thenReturn(PaymentProcessState.APPROVED);
 
         var paymentRequest = new PaymentRequest(
                 orderId.id(),
                 List.of(
-                        new PaymentRequest.PaymentDetailRequest(PaymentMethodType.CASH, 10000L),
-                        new PaymentRequest.PaymentDetailRequest(PaymentMethodType.VISA_CARD, 20000L)
+                        new PaymentRequest.PaymentDetailRequest(PaymentMethodType.CASH, 100000L),
+                        new PaymentRequest.PaymentDetailRequest(PaymentMethodType.VISA_CARD, 60000L)
                 )
         );
 
@@ -77,11 +88,15 @@ class ProcessPaymentUsecaseTest {
 
         // then
         assertNotNull(paymentHistory);
-        assertEquals(30000L, paymentHistory.getTotalPayedAmount());
+        assertEquals(160000L, paymentHistory.getTotalPayedAmount());
         assertEquals(2, paymentHistory.getPaymentDetails().size());
+        assertEquals(PaymentMethodType.CASH, paymentHistory.getPaymentDetails().getFirst().getPaymentMethodType());
+        assertEquals(PaymentMethodType.VISA_CARD, paymentHistory.getPaymentDetails().getLast().getPaymentMethodType());
+        assertEquals(100000L, paymentHistory.getPaymentDetails().getFirst().getTotalPayedAmount());
+        assertEquals(60000L, paymentHistory.getPaymentDetails().getLast().getTotalPayedAmount());
+        assertEquals(OrderStatus.PAID, order.getOrderStatus());
         verify(paymentHistoryRepository).save(any(PaymentHistory.class));
-        verify(paymentMethodRegistry).getPaymentMethod(PaymentMethodType.CASH);
-        verify(paymentMethodRegistry).getPaymentMethod(PaymentMethodType.VISA_CARD);
+
     }
 
     @Test

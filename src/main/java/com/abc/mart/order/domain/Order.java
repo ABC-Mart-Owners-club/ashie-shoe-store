@@ -69,4 +69,8 @@ public class Order {
         return this.orderItems.values().stream().mapToLong(OrderItem::getTotalPrice).sum();
     }
 
+    public void orderGetPaid() {
+        this.orderStatus = OrderStatus.PAID;
+    }
+
 }
