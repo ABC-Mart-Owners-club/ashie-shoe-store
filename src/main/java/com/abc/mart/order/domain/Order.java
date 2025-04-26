@@ -1,7 +1,9 @@
 package com.abc.mart.order.domain;
 
 import com.abc.mart.common.annotation.AggregateRoot;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -9,27 +11,25 @@ import java.util.List;
 import java.util.Map;
 
 @AggregateRoot
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Order {
 
     @Getter
-    private OrderId orderId;
+    OrderId orderId;
 
     @Getter
-    private Map<String, OrderItem> orderItems;
-    private Customer customer;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    Map<String, OrderItem> orderItems;
+    Customer customer;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
 
-    public static Order createOrder(List<OrderItem> orderItems, Customer customer) {
+    public static Order createOrder(Customer customer) {
         Order order = new Order();
         var now = LocalDateTime.now();
 
         OrderId id = OrderId.generate(customer.memberId, now);
         order.orderId = id;
-
-        order.setOrderItems(orderItems);
         order.customer = customer;
-
         order.createdAt = now;
         order.updatedAt = now;
 

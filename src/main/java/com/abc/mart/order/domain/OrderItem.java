@@ -1,25 +1,27 @@
 package com.abc.mart.order.domain;
 
-import com.abc.mart.common.annotation.ValueObject;
+import com.abc.mart.common.annotation.Entity;
 import com.abc.mart.product.domain.Product;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
-@ValueObject
-//Has the same lifecycle with Order entity
+@Entity
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItem {
 
-    @Setter
+    OrderItemId orderItemId;
     @Getter
-    private String productId;
-    private Long orderedPrice; //snapshot of the price when the order was placed
-    private int quantity;
+    String productId;
+    Long orderedPrice; //snapshot of the price when the order was placed
+    int quantity;
 
     @Getter
-    private OrderState orderState;
+    OrderState orderState;
 
-    public static OrderItem of(Product product, int quantity){
+    public static OrderItem of(Product product, int quantity, OrderId orderId, int sequence){
         var orderItem = new OrderItem();
+        orderItem.orderItemId = OrderItemId.generate(orderId, product.getId(), sequence);
         orderItem.productId = product.getId();
         orderItem.orderedPrice = product.getPrice();
         orderItem.quantity = quantity;

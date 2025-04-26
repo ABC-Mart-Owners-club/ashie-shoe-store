@@ -32,13 +32,15 @@ public class PlaceOrderUsecase {
 
         var productMap = productRepository.findByProductId(productIds).stream().collect(Collectors.toMap(Product::getId, p -> p));
 
+        var order = Order.createOrder(customer);
+
         var orderItems = orderRequest.orderItemRequestList().stream().map(orderItemRequest -> {
             var product = productMap.get(orderItemRequest.productId());
             var quantity = orderItemRequest.quantity();
-            return OrderItem.of(product, quantity);
+            return OrderItem.of(product, quantity, order.getOrderId(), orderItemRequest.sequence());
         }).toList();
 
-        var order = Order.createOrder(orderItems, customer);
+        order.setOrderItems(orderItems);
 
         orderRepository.placeOrder(order);
 

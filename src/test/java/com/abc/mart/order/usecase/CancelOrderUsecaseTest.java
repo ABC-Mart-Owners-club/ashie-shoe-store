@@ -32,9 +32,9 @@ class CancelOrderUsecaseTest {
 
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
-        var order = Order.createOrder(
-                List.of(OrderItem.of(products.getFirst(), 10), OrderItem.of(products.getLast(), 3)), customer
-        );
+        var order = Order.createOrder(customer);
+        order.setOrderItems(List.of(OrderItem.of(products.getFirst(), 10, order.getOrderId(), 1),
+                OrderItem.of(products.getLast(), 3, order.getOrderId(), 2)));
 
         var now = LocalDateTime.now();
         var orderId = OrderId.generate(orderMemberId, now);

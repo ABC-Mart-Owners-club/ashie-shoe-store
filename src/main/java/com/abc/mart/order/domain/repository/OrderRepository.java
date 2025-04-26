@@ -16,4 +16,6 @@ public interface OrderRepository extends JpaSpecificationExecutor<Order> {
 
     //jpa를 아직 사용하지 않지만 spec 패턴 실습을 위해 사용
     List<Order> findByTerm(Specification spec);
+
+    void save(Order order);
 }

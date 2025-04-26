@@ -13,7 +13,8 @@ public record OrderRequest(
     @Builder
     public record OrderItemRequest(
             String productId,
-            int quantity
+            int quantity,
+            int sequence
     ){
 
     }

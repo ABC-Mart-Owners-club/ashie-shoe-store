@@ -20,6 +20,8 @@ public class PartialCancelOrderUsecase {
 
         order.partialCancelOrder(request.cancelProductIds());
 
+        orderRepository.save(order);
+
         return order;
     }
 }
