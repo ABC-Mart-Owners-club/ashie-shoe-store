@@ -52,7 +52,7 @@ class CalculateSalesAmountUsecaseTest {
         var from = LocalDateTime.now().minusMonths(1);
         var to = LocalDateTime.now();
 
-        when(orderRepository.findByTerm(any())).thenReturn(List.of(order1, order2, order3));
+        when(orderRepository.findByTerm(any(), any())).thenReturn(List.of(order1, order2, order3));
 
 
         //when

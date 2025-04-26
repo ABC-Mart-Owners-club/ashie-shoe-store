@@ -8,9 +8,10 @@ import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.order.domain.repository.ProductRepository;
 import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.product.domain.Product;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
 

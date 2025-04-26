@@ -3,7 +3,6 @@ package com.abc.mart.order.usecase;
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
-import com.abc.mart.order.usecase.dto.PartialOrderCancelRequest;
 import com.abc.mart.product.domain.Product;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -45,8 +44,9 @@ class CancelOrderUsecaseTest {
         var res = usecase.cancelOrder(orderId.id());
 
         //then
-        assertEquals(OrderState.CANCELLED, res.getOrderItems().get(productId1).getOrderState());
-        assertEquals(OrderState.CANCELLED, res.getOrderItems().get(productId2).getOrderState());
+        assertEquals(OrderItemState.CANCELLED, res.getOrderItems().get(productId1).getOrderItemState());
+        assertEquals(OrderItemState.CANCELLED, res.getOrderItems().get(productId2).getOrderItemState());
+        assertEquals(OrderStatus.CANCELLED, res.getOrderStatus());
     }
 
 }

@@ -19,6 +19,9 @@ public class Order {
 
     @Getter
     Map<String, OrderItem> orderItems;
+
+    @Getter
+    OrderStatus orderStatus;
     Customer customer;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
@@ -32,7 +35,7 @@ public class Order {
         order.customer = customer;
         order.createdAt = now;
         order.updatedAt = now;
-
+        order.orderStatus = OrderStatus.REQUESTED;
         return order;
     }
 
@@ -44,10 +47,12 @@ public class Order {
         this.orderItems = orderItemMap;
     }
 
+
     public void cancelOrder() {
         for(var orderItem : orderItems.values()){
             orderItem.cancelOrderItem();
         }
+        orderStatus = OrderStatus.CANCELLED;
     }
 
     public void partialCancelOrder(List<String> cancelledOrderIds) {

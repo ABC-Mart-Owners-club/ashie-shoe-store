@@ -17,7 +17,7 @@ public class OrderItem {
     int quantity;
 
     @Getter
-    OrderState orderState;
+    OrderItemState orderItemState;
 
     public static OrderItem of(Product product, int quantity, OrderId orderId, int sequence){
         var orderItem = new OrderItem();
@@ -25,13 +25,17 @@ public class OrderItem {
         orderItem.productId = product.getId();
         orderItem.orderedPrice = product.getPrice();
         orderItem.quantity = quantity;
-        orderItem.orderState = OrderState.PREPARING;
+        orderItem.orderItemState = OrderItemState.PREPARING;
 
         return orderItem;
     }
 
     public void cancelOrderItem(){
-        this.orderState = OrderState.CANCELLED;
+        if(OrderItemState.SHIPPED.equals(orderItemState) || OrderItemState.DELIVERED.equals(orderItemState)){
+            throw new RuntimeException("OrderItem is already " + orderItemState.name());
+        }
+
+        this.orderItemState = OrderItemState.CANCELLED;
     }
 
     public Long getTotalPrice(){
