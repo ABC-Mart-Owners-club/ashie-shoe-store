@@ -3,12 +3,14 @@ package com.abc.mart.order.usecase;
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
+import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.product.domain.Product;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -31,9 +33,14 @@ class CancelOrderUsecaseTest {
 
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
-        var order = Order.createOrder(customer);
-        order.setOrderItems(List.of(OrderItem.of(products.getFirst(), 10, order.getOrderId(), 1),
-                OrderItem.of(products.getLast(), 3, order.getOrderId(), 2)));
+        var productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
+
+        var orderItemRequests = List.of(
+                new OrderRequest.OrderItemRequest(products.get(0).getId(), 10, 1),
+                new OrderRequest.OrderItemRequest(products.get(1).getId(), 3, 2)
+        );
+
+        var order = Order.createOrder(customer, productMap, orderItemRequests);
 
         var now = LocalDateTime.now();
         var orderId = OrderId.generate(orderMemberId, now);

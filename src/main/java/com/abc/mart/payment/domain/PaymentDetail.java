@@ -12,13 +12,20 @@ import lombok.experimental.FieldDefaults;
 public class PaymentDetail {
 
     PaymentMethodType paymentMethodType;
-    long totalPayedAmount;
+    long payedAmountByMethod;
 
     public static PaymentDetail create(PaymentMethodType paymentMethodType, long totalPayedAmount) {
         PaymentDetail paymentDetail = new PaymentDetail();
         paymentDetail.paymentMethodType = paymentMethodType;
-        paymentDetail.totalPayedAmount = totalPayedAmount;
+        paymentDetail.payedAmountByMethod = totalPayedAmount;
         return paymentDetail;
     }
 
+
+    public void partialCancelPayment(long partialCancelledAmount) {
+        if (partialCancelledAmount > payedAmountByMethod) {
+            throw new RuntimeException("Partial cancelled amount is greater than payed amount");
+        }
+        this.payedAmountByMethod -= partialCancelledAmount;
+    }
 }

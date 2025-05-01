@@ -18,10 +18,20 @@ public class AmexCardPaymentMethod implements PaymentMethod {
 
     @Override
     public PaymentProcessState process(long paymentAmount) {
-        log.info("processing cash payment method : {}", paymentAmount);
+        log.info("processing amex payment method : {}", paymentAmount);
 
         return switch(callAmexCardApi()){
             //외부 카드사 api에서 사용하는 상태값을 우리가 사용하는 상태값으로 치환하는 프로세스
+            case AMEX_CARD_PROCESSING_FINISHED -> PaymentProcessState.APPROVED;
+            case AMEX_CARD_PROCESSING_FAILED -> PaymentProcessState.FAILED;
+        };
+    }
+
+    @Override
+    public PaymentProcessState cancel(long cancelledAmount) {
+        log.info("cancel amex payment method : {}", cancelledAmount);
+
+        return switch(callAmexCardApi()){
             case AMEX_CARD_PROCESSING_FINISHED -> PaymentProcessState.APPROVED;
             case AMEX_CARD_PROCESSING_FAILED -> PaymentProcessState.FAILED;
         };

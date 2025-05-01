@@ -20,4 +20,10 @@ public class CashPaymentMethod implements PaymentMethod {
       return PaymentProcessState.APPROVED;
     }
 
+    @Override
+    public PaymentProcessState cancel(long cancelledAmount) {
+        log.info("cancel cash payment method : {}", cancelledAmount);
+        return PaymentProcessState.APPROVED;
+    }
+
 }

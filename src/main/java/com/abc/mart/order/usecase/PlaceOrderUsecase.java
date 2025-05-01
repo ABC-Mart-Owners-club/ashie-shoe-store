@@ -3,7 +3,6 @@ package com.abc.mart.order.usecase;
 import com.abc.mart.member.domain.repository.MemberRepository;
 import com.abc.mart.order.domain.Customer;
 import com.abc.mart.order.domain.Order;
-import com.abc.mart.order.domain.OrderItem;
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.order.domain.repository.ProductRepository;
 import com.abc.mart.order.usecase.dto.OrderRequest;
@@ -33,15 +32,7 @@ public class PlaceOrderUsecase {
 
         var productMap = productRepository.findByProductId(productIds).stream().collect(Collectors.toMap(Product::getId, p -> p));
 
-        var order = Order.createOrder(customer);
-
-        var orderItems = orderRequest.orderItemRequestList().stream().map(orderItemRequest -> {
-            var product = productMap.get(orderItemRequest.productId());
-            var quantity = orderItemRequest.quantity();
-            return OrderItem.of(product, quantity, order.getOrderId(), orderItemRequest.sequence());
-        }).toList();
-
-        order.setOrderItems(orderItems);
+        var order = Order.createOrder(customer, productMap, orderRequest.orderItemRequestList());
 
         orderRepository.placeOrder(order);
 

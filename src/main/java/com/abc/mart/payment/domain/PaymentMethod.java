@@ -6,5 +6,6 @@ public interface PaymentMethod {
 
     PaymentMethodType getPaymentMethodType();
     PaymentProcessState process(long paymentAmount);
+    PaymentProcessState cancel(long cancelledAmount);
 
 }

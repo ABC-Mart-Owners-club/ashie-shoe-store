@@ -18,10 +18,19 @@ public class VisaCardPaymentMethod implements PaymentMethod {
 
     @Override
     public PaymentProcessState process(long paymentAmount) {
-        log.info("processing cash payment method : {}", paymentAmount);
+        log.info("processing visa payment method : {}", paymentAmount);
 
         return switch(callVisaCardApi()){
             //외부 카드사 api에서 사용하는 상태값을 우리가 사용하는 상태값으로 치환하는 프로세스
+            case VISA_CARD_PAYMENT_SUCCESS -> PaymentProcessState.APPROVED;
+            case VISA_CARD_PAYMENT_FAILURE -> PaymentProcessState.FAILED;
+        };
+    }
+
+    @Override
+    public PaymentProcessState cancel(long cancelledAmount) {
+        log.info("cancel visa payment method : {}", cancelledAmount);
+        return switch(callVisaCardApi()){
             case VISA_CARD_PAYMENT_SUCCESS -> PaymentProcessState.APPROVED;
             case VISA_CARD_PAYMENT_FAILURE -> PaymentProcessState.FAILED;
         };

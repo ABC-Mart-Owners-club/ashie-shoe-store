@@ -3,6 +3,7 @@ package com.abc.mart.payment.usecase;
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
+import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.payment.domain.PaymentHistory;
 import com.abc.mart.payment.domain.PaymentMethod;
 import com.abc.mart.payment.domain.PaymentProcessState;
@@ -18,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -66,9 +68,14 @@ class ProcessPaymentUsecaseTest {
         var products = List.of(Product.of(productId1, "productName", price1), Product.of(productId2, "productName", price2));
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
-        var order = Order.createOrder(customer);
-        order.setOrderItems(List.of(OrderItem.of(products.getFirst(), 10, order.getOrderId(), 1),
-                OrderItem.of(products.getLast(), 3, order.getOrderId(), 2)));
+        var productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
+
+        var orderItemRequests = List.of(
+                new OrderRequest.OrderItemRequest(products.get(0).getId(), 10, 1),
+                new OrderRequest.OrderItemRequest(products.get(1).getId(), 3, 2)
+        );
+
+        var order = Order.createOrder(customer, productMap, orderItemRequests);
 
         when(orderRepository.findById(orderId)).thenReturn(order);
 
@@ -90,10 +97,10 @@ class ProcessPaymentUsecaseTest {
         assertNotNull(paymentHistory);
         assertEquals(160000L, paymentHistory.getTotalPayedAmount());
         assertEquals(2, paymentHistory.getPaymentDetails().size());
-        assertEquals(PaymentMethodType.CASH, paymentHistory.getPaymentDetails().getFirst().getPaymentMethodType());
-        assertEquals(PaymentMethodType.VISA_CARD, paymentHistory.getPaymentDetails().getLast().getPaymentMethodType());
-        assertEquals(100000L, paymentHistory.getPaymentDetails().getFirst().getTotalPayedAmount());
-        assertEquals(60000L, paymentHistory.getPaymentDetails().getLast().getTotalPayedAmount());
+        assertNotNull(paymentHistory.getPaymentDetails().get(PaymentMethodType.CASH));
+        assertNotNull(paymentHistory.getPaymentDetails().get(PaymentMethodType.VISA_CARD));
+        assertEquals(100000L, paymentHistory.getPaymentDetails().get(PaymentMethodType.CASH).getPayedAmountByMethod());
+        assertEquals(60000L, paymentHistory.getPaymentDetails().get(PaymentMethodType.VISA_CARD).getPayedAmountByMethod());
         assertEquals(OrderStatus.PAID, order.getOrderStatus());
         verify(paymentHistoryRepository).save(any(PaymentHistory.class));
 

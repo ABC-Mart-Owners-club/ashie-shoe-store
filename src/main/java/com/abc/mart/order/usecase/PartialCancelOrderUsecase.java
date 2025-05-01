@@ -5,7 +5,10 @@ import com.abc.mart.order.domain.OrderId;
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.order.usecase.dto.PartialOrderCancelRequest;
 
+import com.abc.mart.payment.domain.PaymentHistory;
+import com.abc.mart.payment.domain.repository.PaymentHistoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,15 +17,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class PartialCancelOrderUsecase {
 
     private final OrderRepository orderRepository;
+    private final PaymentHistoryRepository paymentHistoryRepository;
 
     @Transactional
-    public Order cancelPartialOrder(PartialOrderCancelRequest request){
+    public Pair<Order, PaymentHistory> cancelPartialOrder(PartialOrderCancelRequest request){
         var order = orderRepository.findById(OrderId.of(request.orderId()));
-
         order.partialCancelOrder(request.cancelProductIds());
 
-        orderRepository.save(order);
+        var paymentHistory = paymentHistoryRepository.findByOrderId(OrderId.of(request.orderId()));
+        paymentHistory.cancelPartialPayment(request.partialPaymentCancelRequests());
 
-        return order;
+        orderRepository.save(order);
+        paymentHistoryRepository.save(paymentHistory);
+
+        return Pair.of(order, paymentHistory);
     }
 }
