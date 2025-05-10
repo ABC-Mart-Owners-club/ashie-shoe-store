@@ -4,15 +4,31 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
+@Getter
 public class Product {
 
-    @Getter
     private String id;
     private String name;
-    @Getter
     private long price;
+    private int stockCount;
+    private boolean isAvaliable;
 
-    public static Product of(String id, String name, long price) {
-        return new Product(id, name, price);
+    public static Product of(String id, String name, long price, int stockCount, boolean isOnSale) {
+        return new Product(id, name, price, stockCount, isOnSale);
+    }
+
+    public void addStock(int quantity){
+        this.stockCount += quantity;
+    }
+
+    public void subtractStock(int quantity){
+        if (this.stockCount < quantity) {
+            throw new IllegalArgumentException("Insufficient stock");
+        }
+        this.stockCount -= quantity;
+    }
+
+    public void manageProductAvailability(boolean isAvailable) {
+        this.isAvaliable = isAvailable;
     }
 }

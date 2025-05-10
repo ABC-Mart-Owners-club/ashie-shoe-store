@@ -4,7 +4,7 @@ import com.abc.mart.member.domain.Member;
 import com.abc.mart.member.domain.repository.MemberRepository;
 import com.abc.mart.order.domain.OrderState;
 import com.abc.mart.order.domain.repository.OrderRepository;
-import com.abc.mart.order.domain.repository.ProductRepository;
+import com.abc.mart.product.domain.repository.ProductRepository;
 import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.product.domain.Product;
 import org.junit.jupiter.api.Test;
@@ -43,20 +43,24 @@ class PlaceOrderUsecaseTest {
 
         var member = Member.of(orderMemberId, "memberName", "email", "phoneNum");
         var productIds = List.of(productId1, productId2);
-        var products = List.of(Product.of(productId1, "productName", price1), Product.of(productId2, "productName", price2));
+        var products = List.of(Product.of(productId1, "productName", price1, 10, true), Product.of(productId2, "productName", price2, 5, true));
 
         when(memberRepository.findByMemberId(orderMemberId)).thenReturn(member);
-        when(productRepository.findByProductId(productIds)).thenReturn(products);
+        when(productRepository.findAllByProductIdAndIsAvailable(productIds, true)).thenReturn(products);
 
         //when
         var result = placeOrderUsecase.placeOrder(orderRequest);
 
         //then
-        assertEquals(70000, result.calculateTotalPrice());
-        assertEquals(OrderState.PREPARING, result.getOrderItems().get(productId1).getOrderState());
-        assertEquals(OrderState.PREPARING, result.getOrderItems().get(productId2).getOrderState());
-        assertEquals(10000, result.getOrderItems().get(productId1).getTotalPrice());
-        assertEquals(60000, result.getOrderItems().get(productId2).getTotalPrice());
+        var resOrder = result.getFirst();
+        var resProducts = result.getSecond();
+        assertEquals(70000, resOrder.calculateTotalPrice());
+        assertEquals(OrderState.PREPARING, resOrder.getOrderItems().get(productId1).getOrderState());
+        assertEquals(OrderState.PREPARING, resOrder.getOrderItems().get(productId2).getOrderState());
+        assertEquals(10000, resOrder.getOrderItems().get(productId1).getTotalPrice());
+        assertEquals(60000, resOrder.getOrderItems().get(productId2).getTotalPrice());
+        assertEquals(9, resProducts.get(productId1).getStockCount());
+        assertEquals(2, resProducts.get(productId2).getStockCount());
     }
 
 }

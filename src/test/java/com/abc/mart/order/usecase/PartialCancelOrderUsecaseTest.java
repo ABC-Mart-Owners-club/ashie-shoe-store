@@ -6,19 +6,24 @@ import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.order.usecase.dto.PartialOrderCancelRequest;
 import com.abc.mart.product.domain.Product;
+import com.abc.mart.product.domain.repository.ProductRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 class PartialCancelOrderUsecaseTest {
 
     OrderRepository orderRepository = Mockito.mock(OrderRepository.class);
-    PartialCancelOrderUsecase usecase = new PartialCancelOrderUsecase(orderRepository);
+    ProductRepository productRepository = Mockito.mock(ProductRepository.class);
+    PartialCancelOrderUsecase usecase = new PartialCancelOrderUsecase(orderRepository, productRepository);
 
     @Test
     void cancelPartialOrder() {
@@ -29,7 +34,7 @@ class PartialCancelOrderUsecaseTest {
         var price2 = 20000;
 
         var orderMemberId = "memberId";
-        var products = List.of(Product.of(productId1, "productName", price1), Product.of(productId2, "productName", price2));
+        var products = List.of(Product.of(productId1, "productName", price1, 10, true), Product.of(productId2, "productName", price2, 5, true));
 
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
@@ -40,6 +45,8 @@ class PartialCancelOrderUsecaseTest {
         var now = LocalDateTime.now();
         var orderId = OrderId.generate(orderMemberId, now);
         when(orderRepository.findById(orderId)).thenReturn(order);
+        when(productRepository.findByProductIdAndIsAvailable(productId1, true)).thenReturn(Optional.of(products.getFirst()));
+        when(productRepository.findByProductIdAndIsAvailable(productId2, true)).thenReturn(Optional.of(products.getLast()));
 
 
         var partialCancelRequest = PartialOrderCancelRequest.builder().orderId(orderId.id()).cancelProductIds(List.of(productId1)).build();
@@ -48,6 +55,7 @@ class PartialCancelOrderUsecaseTest {
         var res = usecase.cancelPartialOrder(partialCancelRequest);
 
         //then
+        //재고 변경은 로그로 확인 가능
         assertEquals(OrderState.CANCELLED, res.getOrderItems().get(productId1).getOrderState());
         assertEquals(OrderState.PREPARING, res.getOrderItems().get(productId2).getOrderState());
     }

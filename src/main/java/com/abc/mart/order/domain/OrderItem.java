@@ -13,6 +13,7 @@ public class OrderItem {
     @Getter
     private String productId;
     private Long orderedPrice; //snapshot of the price when the order was placed
+    @Getter
     private int quantity;
 
     @Getter

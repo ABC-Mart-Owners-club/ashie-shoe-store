@@ -4,6 +4,7 @@ import com.abc.mart.common.annotation.AggregateRoot;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,10 +51,13 @@ public class Order {
         }
     }
 
-    public void partialCancelOrder(List<String> cancelledOrderIds) {
-        for(var cancelledOrderId : cancelledOrderIds){
+    public List<OrderItem> partialCancelOrder(List<String> cancelledItemIds) {
+        List<OrderItem> cancelledItems = new ArrayList<>();
+        for(var cancelledOrderId : cancelledItemIds){
             orderItems.get(cancelledOrderId).cancelOrderItem();
+            cancelledItems.add(orderItems.get(cancelledOrderId));
         }
+        return cancelledItems;
     }
 
     public long calculateSalesAmountOfSpecificProduct(String productId){
