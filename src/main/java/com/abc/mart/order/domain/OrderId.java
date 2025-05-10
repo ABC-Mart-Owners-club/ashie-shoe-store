@@ -1,9 +1,12 @@
 package com.abc.mart.order.domain;
 
+import com.abc.mart.common.annotation.ValueObject;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+@ValueObject
 public record OrderId (
         String id
 ){

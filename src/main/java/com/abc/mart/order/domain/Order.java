@@ -1,53 +1,59 @@
 package com.abc.mart.order.domain;
 
 import com.abc.mart.common.annotation.AggregateRoot;
+import com.abc.mart.order.usecase.dto.OrderRequest;
+import com.abc.mart.product.domain.Product;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @AggregateRoot
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Order {
 
     @Getter
-    private OrderId orderId;
+    OrderId orderId;
 
     @Getter
-    private Map<String, OrderItem> orderItems;
-    private Customer customer;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    Map<String, OrderItem> orderItems;
 
-    public static Order createOrder(List<OrderItem> orderItems, Customer customer) {
+    @Getter
+    OrderStatus orderStatus;
+    Customer customer;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
+
+    public static Order createOrder(Customer customer, Map<String, Product> productMap, List<OrderRequest.OrderItemRequest> orderItemRequests) {
         Order order = new Order();
         var now = LocalDateTime.now();
 
         OrderId id = OrderId.generate(customer.memberId, now);
         order.orderId = id;
-
-        order.setOrderItems(orderItems);
         order.customer = customer;
-
         order.createdAt = now;
         order.updatedAt = now;
+        order.orderStatus = OrderStatus.REQUESTED;
+
+        order.orderItems = orderItemRequests.stream().map(orderItemRequest -> {
+            var product = productMap.get(orderItemRequest.productId());
+            var quantity = orderItemRequest.quantity();
+            return OrderItem.of(product, quantity, order.getOrderId(), orderItemRequest.sequence());
+        }).collect(Collectors.toMap(OrderItem::getProductId, Function.identity()));
 
         return order;
-    }
-
-    public void setOrderItems(List<OrderItem> orderItems){
-        var orderItemMap = new HashMap<String, OrderItem>();
-        for (OrderItem orderItem : orderItems) {
-            orderItemMap.put(orderItem.getProductId(), orderItem);
-        }
-        this.orderItems = orderItemMap;
     }
 
     public void cancelOrder() {
         for(var orderItem : orderItems.values()){
             orderItem.cancelOrderItem();
         }
+        orderStatus = OrderStatus.CANCELLED;
     }
 
     public void partialCancelOrder(List<String> cancelledOrderIds) {
@@ -61,7 +67,11 @@ public class Order {
     }
 
     public long calculateTotalPrice() {
-        return this.orderItems.values().stream().mapToLong(OrderItem::getTotalPrice).sum();
+        return this.orderItems.values().stream().filter(orderItem -> !OrderItemState.CANCELLED.equals(orderItem.getOrderItemState())).mapToLong(OrderItem::getTotalPrice).sum();
+    }
+
+    public void orderGetPaid() {
+        this.orderStatus = OrderStatus.PAID;
     }
 
 }

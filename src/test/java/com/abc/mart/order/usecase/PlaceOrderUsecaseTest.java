@@ -2,7 +2,7 @@ package com.abc.mart.order.usecase;
 
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.member.domain.repository.MemberRepository;
-import com.abc.mart.order.domain.OrderState;
+import com.abc.mart.order.domain.OrderItemState;
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.order.domain.repository.ProductRepository;
 import com.abc.mart.order.usecase.dto.OrderRequest;
@@ -53,8 +53,8 @@ class PlaceOrderUsecaseTest {
 
         //then
         assertEquals(70000, result.calculateTotalPrice());
-        assertEquals(OrderState.PREPARING, result.getOrderItems().get(productId1).getOrderState());
-        assertEquals(OrderState.PREPARING, result.getOrderItems().get(productId2).getOrderState());
+        assertEquals(OrderItemState.PREPARING, result.getOrderItems().get(productId1).getOrderItemState());
+        assertEquals(OrderItemState.PREPARING, result.getOrderItems().get(productId2).getOrderItemState());
         assertEquals(10000, result.getOrderItems().get(productId1).getTotalPrice());
         assertEquals(60000, result.getOrderItems().get(productId2).getTotalPrice());
     }

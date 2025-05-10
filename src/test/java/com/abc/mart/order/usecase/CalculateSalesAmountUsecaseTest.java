@@ -4,12 +4,14 @@ import com.abc.mart.member.domain.Member;
 import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.order.usecase.dto.CalculateSalesRequest;
+import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.product.domain.Product;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,21 +35,30 @@ class CalculateSalesAmountUsecaseTest {
 
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
-        var order1 = Order.createOrder(
-                List.of(OrderItem.of(products.getFirst(), 10), OrderItem.of(products.getLast(), 3)), customer
-        );
-        var order2 = Order.createOrder(
-                List.of(OrderItem.of(products.getFirst(), 7), OrderItem.of(products.getLast(), 2)), customer
-        );
+        var productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
 
-        var order3 = Order.createOrder(
-                List.of(OrderItem.of(products.getFirst(), 6), OrderItem.of(products.getLast(), 2)), customer
+        var orderItemRequests1 = List.of(
+                new OrderRequest.OrderItemRequest(productId1, 10, 1),
+                new OrderRequest.OrderItemRequest(productId2, 3, 2)
         );
+        var order1 = Order.createOrder(customer, productMap, orderItemRequests1);
+
+        var orderItemRequests2 = List.of(
+                new OrderRequest.OrderItemRequest(productId1, 7, 1),
+                new OrderRequest.OrderItemRequest(productId2, 2, 2)
+        );
+        var order2 = Order.createOrder(customer, productMap, orderItemRequests2);
+
+        var orderItemRequests3 = List.of(
+                new OrderRequest.OrderItemRequest(productId1, 6, 1),
+                new OrderRequest.OrderItemRequest(productId2, 2, 2)
+        );
+        var order3 = Order.createOrder(customer, productMap, orderItemRequests3);
 
         var from = LocalDateTime.now().minusMonths(1);
         var to = LocalDateTime.now();
 
-        when(orderRepository.findByTerm(any())).thenReturn(List.of(order1, order2, order3));
+        when(orderRepository.findByTerm(any(), any())).thenReturn(List.of(order1, order2, order3));
 
 
         //when

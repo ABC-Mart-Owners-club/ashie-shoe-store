@@ -1,35 +1,41 @@
 package com.abc.mart.order.domain;
 
-import com.abc.mart.common.annotation.ValueObject;
+import com.abc.mart.common.annotation.Entity;
 import com.abc.mart.product.domain.Product;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.experimental.FieldDefaults;
 
-@ValueObject
-//Has the same lifecycle with Order entity
+@Entity
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItem {
 
-    @Setter
+    OrderItemId orderItemId;
     @Getter
-    private String productId;
-    private Long orderedPrice; //snapshot of the price when the order was placed
-    private int quantity;
+    String productId;
+    Long orderedPrice; //snapshot of the price when the order was placed
+    int quantity;
 
     @Getter
-    private OrderState orderState;
+    OrderItemState orderItemState;
 
-    public static OrderItem of(Product product, int quantity){
+    public static OrderItem of(Product product, int quantity, OrderId orderId, int sequence){
         var orderItem = new OrderItem();
+        orderItem.orderItemId = OrderItemId.generate(orderId, product.getId(), sequence);
         orderItem.productId = product.getId();
         orderItem.orderedPrice = product.getPrice();
         orderItem.quantity = quantity;
-        orderItem.orderState = OrderState.PREPARING;
+        orderItem.orderItemState = OrderItemState.PREPARING;
 
         return orderItem;
     }
 
     public void cancelOrderItem(){
-        this.orderState = OrderState.CANCELLED;
+        if(OrderItemState.SHIPPED.equals(orderItemState) || OrderItemState.DELIVERED.equals(orderItemState)){
+            throw new RuntimeException("OrderItem is already " + orderItemState.name());
+        }
+
+        this.orderItemState = OrderItemState.CANCELLED;
     }
 
     public Long getTotalPrice(){

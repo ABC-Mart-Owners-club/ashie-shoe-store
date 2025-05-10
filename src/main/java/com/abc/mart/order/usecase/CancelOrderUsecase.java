@@ -3,9 +3,9 @@ package com.abc.mart.order.usecase;
 import com.abc.mart.order.domain.Order;
 import com.abc.mart.order.domain.OrderId;
 import com.abc.mart.order.domain.repository.OrderRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
