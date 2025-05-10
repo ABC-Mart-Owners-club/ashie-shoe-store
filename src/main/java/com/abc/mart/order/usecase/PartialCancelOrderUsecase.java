@@ -22,9 +22,9 @@ public class PartialCancelOrderUsecase {
     public Order cancelPartialOrder(PartialOrderCancelRequest request) {
         var order = orderRepository.findById(OrderId.of(request.orderId()));
 
-        var canceledItems = order.partialCancelOrder(request.cancelProductIds());
+        var cancelledItems = order.partialCancelOrder(request.cancelProductIds());
 
-        canceledItems.forEach(item -> productRepository.findByProductIdAndIsAvailable(item.getProductId(), true)
+        cancelledItems.forEach(item -> productRepository.findByProductIdAndIsAvailable(item.getProductId(), true)
                 .ifPresentOrElse(
                 p -> {
                     var before = p.getStockCount();
