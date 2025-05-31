@@ -3,33 +3,40 @@ package com.abc.mart.order.usecase;
 import com.abc.mart.order.domain.Order;
 import com.abc.mart.order.domain.OrderId;
 import com.abc.mart.order.domain.repository.OrderRepository;
+import com.abc.mart.product.domain.repository.ProductRepository;
 import com.abc.mart.order.usecase.dto.PartialOrderCancelRequest;
-
-import com.abc.mart.payment.domain.PaymentHistory;
-import com.abc.mart.payment.domain.repository.PaymentHistoryRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.tuple.Pair;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PartialCancelOrderUsecase {
 
     private final OrderRepository orderRepository;
-    private final PaymentHistoryRepository paymentHistoryRepository;
+    private final ProductRepository productRepository;
 
     @Transactional
-    public Pair<Order, PaymentHistory> cancelPartialOrder(PartialOrderCancelRequest request){
+    public Order cancelPartialOrder(PartialOrderCancelRequest request) {
         var order = orderRepository.findById(OrderId.of(request.orderId()));
-        order.partialCancelOrder(request.cancelProductIds());
 
-        var paymentHistory = paymentHistoryRepository.findByOrderId(OrderId.of(request.orderId()));
-        paymentHistory.cancelPartialPayment(request.partialPaymentCancelRequests());
+        var cancelledItems = order.partialCancelOrder(request.cancelProductIds());
 
-        orderRepository.save(order);
-        paymentHistoryRepository.save(paymentHistory);
+        cancelledItems.forEach(item -> productRepository.findByProductIdAndIsAvailable(item.getProductId(), true)
+                .ifPresentOrElse(
+                p -> {
+                    var before = p.getStockCount();
+                    p.addStock(item.getQuantity());
+                    log.info("Product {} stock updated: {} -> {}", p.getId(), before, p.getStockCount());
+                    productRepository.save(p);
+                },
+                () ->
+                    log.error("Product not on sale: {}", item.getProductId())
+                    //따로 예외로 터뜨리진 않음 (해당 상품이 삭제되었거나 할 수 있기 때문에 에러 메세지로 처리)
+        ));
 
-        return Pair.of(order, paymentHistory);
+        return order;
     }
 }

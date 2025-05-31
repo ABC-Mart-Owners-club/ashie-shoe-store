@@ -31,7 +31,7 @@ class CalculateSalesAmountUsecaseTest {
         var price2 = 20000;
 
         var orderMemberId = "memberId";
-        var products = List.of(Product.of(productId1, "productName", price1), Product.of(productId2, "productName", price2));
+        var products = List.of(Product.of(productId1, "productName", price1, 10, true), Product.of(productId2, "productName", price2, 5, true));
 
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
