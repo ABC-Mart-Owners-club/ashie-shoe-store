@@ -17,20 +17,20 @@ public class OrderItem {
     private int quantity;
 
     @Getter
-    private OrderState orderState;
+    private OrderItemState orderState;
 
     public static OrderItem of(Product product, int quantity){
         var orderItem = new OrderItem();
         orderItem.productId = product.getId();
         orderItem.orderedPrice = product.getPrice();
         orderItem.quantity = quantity;
-        orderItem.orderState = OrderState.PREPARING;
+        orderItem.orderState = OrderItemState.PREPARING;
 
         return orderItem;
     }
 
     public void cancelOrderItem(){
-        this.orderState = OrderState.CANCELLED;
+        this.orderState = OrderItemState.CANCELLED;
     }
 
     public Long getTotalPrice(){

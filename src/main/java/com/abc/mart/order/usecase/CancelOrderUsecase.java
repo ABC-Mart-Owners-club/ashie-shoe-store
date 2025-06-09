@@ -4,10 +4,10 @@ import com.abc.mart.order.domain.Order;
 import com.abc.mart.order.domain.OrderId;
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.product.domain.repository.ProductRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j

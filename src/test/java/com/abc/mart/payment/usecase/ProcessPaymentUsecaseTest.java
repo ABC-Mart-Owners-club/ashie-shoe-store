@@ -65,17 +65,18 @@ class ProcessPaymentUsecaseTest {
         var price2 = 20000;
 
         var orderMemberId = "memberId";
-        var products = List.of(Product.of(productId1, "productName", price1), Product.of(productId2, "productName", price2));
+        var products = List.of(Product.of(productId1, "productName", price1, 10, true), Product.of(productId2, "productName", price2, 20, true));
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
         var productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
 
-        var orderItemRequests = List.of(
-                new OrderRequest.OrderItemRequest(products.get(0).getId(), 10, 1),
-                new OrderRequest.OrderItemRequest(products.get(1).getId(), 3, 2)
+        var orderItems = List.of(
+                        OrderItem.of(products.get(0), 10),
+                        OrderItem.of(products.get(1), 3)
+
         );
 
-        var order = Order.createOrder(customer, productMap, orderItemRequests);
+        var order = Order.createOrder(orderItems, customer);
 
         when(orderRepository.findById(orderId)).thenReturn(order);
 

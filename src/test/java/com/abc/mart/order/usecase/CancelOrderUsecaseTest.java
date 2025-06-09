@@ -53,8 +53,8 @@ class CancelOrderUsecaseTest {
 
         //then
         //재고 변경은 로그로 확인 가능
-        assertEquals(OrderState.CANCELLED, res.getOrderItems().get(productId1).getOrderState());
-        assertEquals(OrderState.CANCELLED, res.getOrderItems().get(productId2).getOrderState());
+        assertEquals(OrderItemState.CANCELLED, res.getOrderItems().get(productId1).getOrderState());
+        assertEquals(OrderItemState.CANCELLED, res.getOrderItems().get(productId2).getOrderState());
     }
 
 }

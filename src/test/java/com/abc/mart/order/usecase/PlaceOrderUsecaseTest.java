@@ -2,7 +2,7 @@ package com.abc.mart.order.usecase;
 
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.member.domain.repository.MemberRepository;
-import com.abc.mart.order.domain.OrderState;
+import com.abc.mart.order.domain.OrderItemState;
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.product.domain.repository.ProductRepository;
 import com.abc.mart.order.usecase.dto.OrderRequest;
@@ -52,11 +52,11 @@ class PlaceOrderUsecaseTest {
         var result = placeOrderUsecase.placeOrder(orderRequest);
 
         //then
-        var resOrder = result.getFirst();
-        var resProducts = result.getSecond();
+        var resOrder = result.getLeft();
+        var resProducts = result.getRight();
         assertEquals(70000, resOrder.calculateTotalPrice());
-        assertEquals(OrderState.PREPARING, resOrder.getOrderItems().get(productId1).getOrderState());
-        assertEquals(OrderState.PREPARING, resOrder.getOrderItems().get(productId2).getOrderState());
+        assertEquals(OrderItemState.PREPARING, resOrder.getOrderItems().get(productId1).getOrderState());
+        assertEquals(OrderItemState.PREPARING, resOrder.getOrderItems().get(productId2).getOrderState());
         assertEquals(10000, resOrder.getOrderItems().get(productId1).getTotalPrice());
         assertEquals(60000, resOrder.getOrderItems().get(productId2).getTotalPrice());
         assertEquals(9, resProducts.get(productId1).getStockCount());

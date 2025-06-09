@@ -17,6 +17,8 @@ public class Order {
 
     @Getter
     private Map<String, OrderItem> orderItems;
+    @Getter
+    private OrderStatus orderStatus;
     private Customer customer;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -30,6 +32,8 @@ public class Order {
 
         order.setOrderItems(orderItems);
         order.customer = customer;
+
+        order.orderStatus = OrderStatus.REQUESTED;
 
         order.createdAt = now;
         order.updatedAt = now;
@@ -49,6 +53,7 @@ public class Order {
         for(var orderItem : orderItems.values()){
             orderItem.cancelOrderItem();
         }
+        orderStatus = OrderStatus.CANCELLED;
     }
 
     public List<OrderItem> partialCancelOrder(List<String> cancelledItemIds) {
@@ -66,6 +71,10 @@ public class Order {
 
     public long calculateTotalPrice() {
         return this.orderItems.values().stream().mapToLong(OrderItem::getTotalPrice).sum();
+    }
+
+    public void orderGetPaid() {
+        this.orderStatus = OrderStatus.PAID;
     }
 
 }
