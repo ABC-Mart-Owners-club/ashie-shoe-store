@@ -10,8 +10,8 @@ import org.mockito.Mockito;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import static com.abc.mart.test.TestStubCreator.generateRandomStocks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -31,8 +31,8 @@ class CalculateSalesAmountUsecaseTest {
 
         var orderMemberId = "memberId";
         var products = List.of(
-                Product.of(productId1, "productName1", price1, 10, true),
-                Product.of(productId2, "productName2", price2, 5, true)
+                Product.of(productId1, "productName1", price1, generateRandomStocks(10), true),
+                Product.of(productId2, "productName2", price2, generateRandomStocks(5), true)
         );
 
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));

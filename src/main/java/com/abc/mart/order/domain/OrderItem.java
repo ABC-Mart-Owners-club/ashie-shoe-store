@@ -5,6 +5,8 @@ import com.abc.mart.product.domain.Product;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @ValueObject
 //Has the same lifecycle with Order entity
 public class OrderItem {
@@ -17,6 +19,8 @@ public class OrderItem {
     private int quantity;
 
     @Getter
+    private List<String> stockIds;
+    @Getter
     private OrderItemState orderState;
 
     public static OrderItem of(Product product, int quantity){
@@ -27,6 +31,10 @@ public class OrderItem {
         orderItem.orderState = OrderItemState.PREPARING;
 
         return orderItem;
+    }
+
+    public void setStockIds(List<String> stockIds) {
+        this.stockIds = stockIds;
     }
 
     public void cancelOrderItem(){

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.abc.mart.test.TestStubCreator.generateRandomStocks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -43,7 +44,8 @@ class PlaceOrderUsecaseTest {
 
         var member = Member.of(orderMemberId, "memberName", "email", "phoneNum");
         var productIds = List.of(productId1, productId2);
-        var products = List.of(Product.of(productId1, "productName", price1, 10, true), Product.of(productId2, "productName", price2, 5, true));
+        var products = List.of(Product.of(productId1, "productName", price1, generateRandomStocks(10), true), Product.of(productId2, "productName", price2,
+                generateRandomStocks(5), true));
 
         when(memberRepository.findByMemberId(orderMemberId)).thenReturn(member);
         when(productRepository.findAllByProductIdAndIsAvailable(productIds, true)).thenReturn(products);
@@ -59,8 +61,10 @@ class PlaceOrderUsecaseTest {
         assertEquals(OrderItemState.PREPARING, resOrder.getOrderItems().get(productId2).getOrderState());
         assertEquals(10000, resOrder.getOrderItems().get(productId1).getTotalPrice());
         assertEquals(60000, resOrder.getOrderItems().get(productId2).getTotalPrice());
-        assertEquals(9, resProducts.get(productId1).getStockCount());
-        assertEquals(2, resProducts.get(productId2).getStockCount());
+        assertEquals(9, resProducts.get(productId1).getStocks().stream().filter(s -> !s.isSold()).toList().size());
+        assertEquals(2, resProducts.get(productId2).getStocks().stream().filter(s -> !s.isSold()).toList().size());
     }
+
+
 
 }

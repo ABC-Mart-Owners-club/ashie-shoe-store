@@ -26,9 +26,9 @@ public class CancelOrderUsecase {
         order.getOrderItems().forEach(((id, item) -> productRepository.findByProductIdAndIsAvailable(item.getProductId(), true)
                 .ifPresentOrElse(
                         p -> {
-                            var before = p.getStockCount();
-                            p.addStock(item.getQuantity());
-                            log.info("Product {} stock updated: {} -> {}", p.getId(), before, p.getStockCount());
+                            var before = p.getStocks();
+                            p.restoreStock(item.getStockIds());
+                            log.info("Product {} stock updated: {} -> {}", p.getId(), before, p.getStocks());
                             productRepository.save(p);
                         },
                         () ->

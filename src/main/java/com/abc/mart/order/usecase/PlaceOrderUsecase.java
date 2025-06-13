@@ -43,18 +43,27 @@ public class PlaceOrderUsecase {
             }
 
             var quantity = orderItemRequest.quantity();
-            return OrderItem.of(product, quantity);
+
+            var orderItem = OrderItem.of(product, quantity);
+
+            var orderedProduct = productMap.get(orderItem.getProductId());
+            var soldStockIds = orderedProduct.subtractStock(orderItem.getQuantity());
+            orderItem.setStockIds(soldStockIds);
+
+            productRepository.save(orderedProduct);
+
+            return orderItem;
         }).toList();
 
         var order = Order.createOrder(orderItems, customer);
+
+
 
         orderRepository.placeOrder(order);
 
         orderItems.forEach(orderItem ->
         {
-            var orderedProduct = productMap.get(orderItem.getProductId());
-            orderedProduct.subtractStock(orderItem.getQuantity());
-            productRepository.save(orderedProduct);
+
         });
         return Pair.of(order, productMap);
     }

@@ -3,7 +3,6 @@ package com.abc.mart.payment.usecase;
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
-import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.payment.domain.PaymentHistory;
 import com.abc.mart.payment.domain.PaymentMethod;
 import com.abc.mart.payment.domain.PaymentProcessState;
@@ -21,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.abc.mart.test.TestStubCreator.generateRandomStocks;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -65,7 +65,8 @@ class ProcessPaymentUsecaseTest {
         var price2 = 20000;
 
         var orderMemberId = "memberId";
-        var products = List.of(Product.of(productId1, "productName", price1, 10, true), Product.of(productId2, "productName", price2, 20, true));
+        var products = List.of(Product.of(productId1, "productName", price1, generateRandomStocks(10), true),
+                Product.of(productId2, "productName", price2, generateRandomStocks(20), true));
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
         var productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
