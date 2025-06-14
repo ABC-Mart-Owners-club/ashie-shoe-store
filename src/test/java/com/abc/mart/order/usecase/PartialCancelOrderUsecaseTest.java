@@ -3,7 +3,6 @@ package com.abc.mart.order.usecase;
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
-import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.order.usecase.dto.PartialOrderCancelRequest;
 import com.abc.mart.product.domain.Product;
 import com.abc.mart.product.domain.repository.ProductRepository;
@@ -14,9 +13,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.abc.mart.test.TestStubCreator.generateRandomStocks;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 class PartialCancelOrderUsecaseTest {
@@ -34,12 +32,20 @@ class PartialCancelOrderUsecaseTest {
         var price2 = 20000;
 
         var orderMemberId = "memberId";
-        var products = List.of(Product.of(productId1, "productName", price1, 10, true), Product.of(productId2, "productName", price2, 5, true));
+        var products = List.of(Product.of(productId1, "productName", price1,
+                        generateRandomStocks(10), true),
+                Product.of(productId2, "productName", price2, generateRandomStocks(5), true));
 
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
+        var orderItem1 = OrderItem.of(products.get(0), 10000, 10);
+        orderItem1.setStockIds(List.of("1","2", "3", "4", "5", "6", "7", "8", "9", "10"));
+
+        var orderItem2 = OrderItem.of(products.get(1), 20000, 3);
+        orderItem2.setStockIds(List.of("2","3","4"));
+
         var order = Order.createOrder(
-                List.of(OrderItem.of(products.getFirst(), 10), OrderItem.of(products.getLast(), 3)), customer
+                List.of(orderItem1, orderItem2), customer
         );
 
         var now = LocalDateTime.now();
@@ -56,8 +62,8 @@ class PartialCancelOrderUsecaseTest {
 
         //then
         //재고 변경은 로그로 확인 가능
-        assertEquals(OrderState.CANCELLED, res.getOrderItems().get(productId1).getOrderState());
-        assertEquals(OrderState.PREPARING, res.getOrderItems().get(productId2).getOrderState());
+        assertEquals(OrderItemState.CANCELLED, res.getOrderItems().get(productId1).getOrderState());
+        assertEquals(OrderItemState.PREPARING, res.getOrderItems().get(productId2).getOrderState());
     }
 
 }

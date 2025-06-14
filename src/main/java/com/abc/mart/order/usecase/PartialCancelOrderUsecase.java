@@ -5,10 +5,10 @@ import com.abc.mart.order.domain.OrderId;
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.product.domain.repository.ProductRepository;
 import com.abc.mart.order.usecase.dto.PartialOrderCancelRequest;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -27,9 +27,9 @@ public class PartialCancelOrderUsecase {
         cancelledItems.forEach(item -> productRepository.findByProductIdAndIsAvailable(item.getProductId(), true)
                 .ifPresentOrElse(
                 p -> {
-                    var before = p.getStockCount();
-                    p.addStock(item.getQuantity());
-                    log.info("Product {} stock updated: {} -> {}", p.getId(), before, p.getStockCount());
+                    var before = p.getStocks();
+                    p.restoreStock(item.getStockIds());
+                    log.info("Product {} stock updated: {} -> {}", p.getId(), before, p.getStocks());
                     productRepository.save(p);
                 },
                 () ->

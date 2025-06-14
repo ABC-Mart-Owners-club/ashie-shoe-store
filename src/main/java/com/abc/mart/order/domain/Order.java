@@ -2,6 +2,7 @@ package com.abc.mart.order.domain;
 
 import com.abc.mart.common.annotation.AggregateRoot;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -17,6 +18,11 @@ public class Order {
 
     @Getter
     private Map<String, OrderItem> orderItems;
+    @Getter
+    private OrderStatus orderStatus;
+
+    @Getter
+    private List<CouponRedemptionHistory> couponRedemptionHistories;
     private Customer customer;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -29,12 +35,20 @@ public class Order {
         order.orderId = id;
 
         order.setOrderItems(orderItems);
+
+        order.couponRedemptionHistories = new ArrayList<>();
         order.customer = customer;
+
+        order.orderStatus = OrderStatus.REQUESTED;
 
         order.createdAt = now;
         order.updatedAt = now;
 
         return order;
+    }
+
+    public void saveCouponRedemptionHistories(List<CouponRedemptionHistory> couponRedemptionHistories) {
+        this.couponRedemptionHistories.addAll(couponRedemptionHistories);
     }
 
     public void setOrderItems(List<OrderItem> orderItems){
@@ -49,6 +63,7 @@ public class Order {
         for(var orderItem : orderItems.values()){
             orderItem.cancelOrderItem();
         }
+        orderStatus = OrderStatus.CANCELLED;
     }
 
     public List<OrderItem> partialCancelOrder(List<String> cancelledItemIds) {
@@ -64,8 +79,17 @@ public class Order {
         return this.orderItems.get(productId).getTotalPrice();
     }
 
+    public long calculateTotalDiscountedAmount() {
+        return couponRedemptionHistories.stream().mapToLong(CouponRedemptionHistory::getDiscountedPrice).sum();
+    }
+
     public long calculateTotalPrice() {
-        return this.orderItems.values().stream().mapToLong(OrderItem::getTotalPrice).sum();
+        return this.orderItems.values().stream().mapToLong(OrderItem::getTotalPrice).sum()
+                - calculateTotalDiscountedAmount();
+    }
+
+    public void orderGetPaid() {
+        this.orderStatus = OrderStatus.PAID;
     }
 
 }
