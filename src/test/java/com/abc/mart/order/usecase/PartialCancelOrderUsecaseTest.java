@@ -45,7 +45,7 @@ class PartialCancelOrderUsecaseTest {
         orderItem2.setStockIds(List.of("2","3","4"));
 
         var order = Order.createOrder(
-                List.of(orderItem1, orderItem2), customer, 5000
+                List.of(orderItem1, orderItem2), customer
         );
 
         var now = LocalDateTime.now();

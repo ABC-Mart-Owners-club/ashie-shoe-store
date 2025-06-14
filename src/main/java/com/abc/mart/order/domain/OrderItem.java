@@ -11,15 +11,16 @@ import java.util.List;
 //Has the same lifecycle with Order entity
 public class OrderItem {
 
+    @Getter
+    private String id;
+
     @Setter
     @Getter
     private String productId;
     @Getter
     private int quantity;
 
-    private long regularPrice;
-
-    private long stockDiscountedAmount;
+    private long orderedPrice;
 
     @Setter
     @Getter
@@ -27,11 +28,12 @@ public class OrderItem {
     @Getter
     private OrderItemState orderState;
 
-    public static OrderItem of(Product product, long regularPrice, int quantity){
+    public static OrderItem of(Product product, long orderedPrice, int quantity){
         var orderItem = new OrderItem();
+        orderItem.id = "orderitem" + product.getId() + System.currentTimeMillis();
         orderItem.productId = product.getId();
         orderItem.quantity = quantity;
-        orderItem.regularPrice = regularPrice;
+        orderItem.orderedPrice = orderedPrice;
         orderItem.orderState = OrderItemState.PREPARING;
         return orderItem;
     }
@@ -40,11 +42,7 @@ public class OrderItem {
         this.orderState = OrderItemState.CANCELLED;
     }
 
-    public void discounted(long amount){
-        stockDiscountedAmount = amount;
-    }
-
     public long getTotalPrice(){
-        return regularPrice * quantity - stockDiscountedAmount;
+        return orderedPrice * quantity;
     }
 }

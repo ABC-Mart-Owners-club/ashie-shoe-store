@@ -41,19 +41,19 @@ class CalculateSalesAmountUsecaseTest {
                 OrderItem.of(products.get(0), products.get(0).getPrice(), 10),
                 OrderItem.of(products.get(1), products.get(1).getPrice(), 3)
         );
-        var order1 = Order.createOrder(orderItems1, customer, 5000);
+        var order1 = Order.createOrder(orderItems1, customer);
 
         var orderItems2 = List.of(
                 OrderItem.of(products.get(0), products.get(0).getPrice(),7),
                 OrderItem.of(products.get(1), products.get(1).getPrice(),2)
         );
-        var order2 = Order.createOrder(orderItems2, customer, 7000);
+        var order2 = Order.createOrder(orderItems2, customer);
 
         var orderItems3 = List.of(
                 OrderItem.of(products.get(0), products.get(0).getPrice(),6),
                 OrderItem.of(products.get(1), products.get(1).getPrice(), 2)
         );
-        var order3 = Order.createOrder(orderItems3, customer, 5000);
+        var order3 = Order.createOrder(orderItems3, customer);
 
         var from = LocalDateTime.now().minusMonths(1);
         var to = LocalDateTime.now();

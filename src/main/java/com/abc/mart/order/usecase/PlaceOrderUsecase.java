@@ -1,10 +1,9 @@
 package com.abc.mart.order.usecase;
 
+import com.abc.mart.coupon.domain.CouponRepository;
 import com.abc.mart.coupon.service.CouponService;
 import com.abc.mart.member.domain.repository.MemberRepository;
-import com.abc.mart.order.domain.Customer;
-import com.abc.mart.order.domain.Order;
-import com.abc.mart.order.domain.OrderItem;
+import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
 import com.abc.mart.product.Stock;
 import com.abc.mart.product.domain.repository.ProductRepository;
@@ -41,7 +40,7 @@ public class PlaceOrderUsecase {
 
         List<OrderItem> orderItems = new ArrayList<>();
 
-        var totalDiscountedAmount = 0L;
+        List<CouponRedemptionHistory> couponRedemptionHistories = new ArrayList<>();
 
         for(OrderRequest.OrderItemRequest orderItemRequest : orderRequest.orderItemRequestList()) {
             var product = productMap.get(orderItemRequest.productId());
@@ -62,19 +61,28 @@ public class PlaceOrderUsecase {
             var stockDiscountAmount = couponService.applyStockCouponAndReturnDiscountedAmount(customer.getMemberId(),
                     soldStocks, orderedProduct.getPrice());
             orderItem.setStockIds(soldStocks.stream().map(Stock::getId).toList());
-            totalDiscountedAmount += stockDiscountAmount;
-            orderItem.discounted(stockDiscountAmount);
+            if(stockDiscountAmount > 0) {
+                couponRedemptionHistories.add(StockCouponRedemptionHistory.create(orderItem.getId(), stockDiscountAmount));
+            }
 
             productRepository.save(orderedProduct);
 
             orderItems.add(orderItem);
         }
 
+
+
+        var order = Order.createOrder(orderItems, customer);
+
         //if seller coupon is available, apply it
         var beforeUniversalCouponAppliedPrice = orderItems.stream().mapToLong(OrderItem::getTotalPrice).sum();
+        var applyUniversalCouponDiscountedAmount = couponService.applyUniversalCouponAndReturnDiscountedAmount(customer.getMemberId(), beforeUniversalCouponAppliedPrice);
 
-        var order = Order.createOrder(orderItems, customer, couponService.applyUniversalCouponAndReturnDiscountedAmount(customer.getMemberId(), beforeUniversalCouponAppliedPrice));
+        if (applyUniversalCouponDiscountedAmount > 0) {
+            couponRedemptionHistories.add(UniversalCouponRedemptionHistory.create(applyUniversalCouponDiscountedAmount, order.getOrderId().id()));
+        }
 
+        order.saveCouponRedemptionHistories(couponRedemptionHistories); // Save coupon redemption histories to the order
         orderRepository.placeOrder(order);
 
         return Pair.of(order, productMap);

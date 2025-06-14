@@ -20,13 +20,14 @@ public class Order {
     private Map<String, OrderItem> orderItems;
     @Getter
     private OrderStatus orderStatus;
-    @Setter
-    private long universalDiscountPrice;
+
+    @Getter
+    private List<CouponRedemptionHistory> couponRedemptionHistories;
     private Customer customer;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static Order createOrder(List<OrderItem> orderItems, Customer customer, long universalDiscountPrice) {
+    public static Order createOrder(List<OrderItem> orderItems, Customer customer) {
         Order order = new Order();
         var now = LocalDateTime.now();
 
@@ -34,15 +35,20 @@ public class Order {
         order.orderId = id;
 
         order.setOrderItems(orderItems);
+
+        order.couponRedemptionHistories = new ArrayList<>();
         order.customer = customer;
 
         order.orderStatus = OrderStatus.REQUESTED;
-        order.universalDiscountPrice = universalDiscountPrice;
 
         order.createdAt = now;
         order.updatedAt = now;
 
         return order;
+    }
+
+    public void saveCouponRedemptionHistories(List<CouponRedemptionHistory> couponRedemptionHistories) {
+        this.couponRedemptionHistories.addAll(couponRedemptionHistories);
     }
 
     public void setOrderItems(List<OrderItem> orderItems){
@@ -73,9 +79,13 @@ public class Order {
         return this.orderItems.get(productId).getTotalPrice();
     }
 
+    public long calculateTotalDiscountedAmount() {
+        return couponRedemptionHistories.stream().mapToLong(CouponRedemptionHistory::getDiscountedPrice).sum();
+    }
+
     public long calculateTotalPrice() {
         return this.orderItems.values().stream().mapToLong(OrderItem::getTotalPrice).sum()
-                - this.universalDiscountPrice;
+                - calculateTotalDiscountedAmount();
     }
 
     public void orderGetPaid() {

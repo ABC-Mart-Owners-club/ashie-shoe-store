@@ -77,7 +77,7 @@ class ProcessPaymentUsecaseTest {
 
         );
 
-        var order = Order.createOrder(orderItems, customer, 0);
+        var order = Order.createOrder(orderItems, customer);
 
         when(orderRepository.findById(orderId)).thenReturn(order);
 

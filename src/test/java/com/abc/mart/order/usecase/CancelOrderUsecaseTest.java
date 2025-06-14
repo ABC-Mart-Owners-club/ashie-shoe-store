@@ -48,7 +48,7 @@ class CancelOrderUsecaseTest {
         orderItem2.setStockIds(List.of("11","12","13","14","15"));
 
         var order = Order.createOrder(
-                List.of(orderItem1, orderItem2), customer, 5000
+                List.of(orderItem1, orderItem2), customer
         );
 
         var now = LocalDateTime.now();
