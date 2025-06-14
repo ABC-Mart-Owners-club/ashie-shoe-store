@@ -31,7 +31,7 @@ public class Product {
                 .forEach(Stock::setUnsold);
     }
 
-    public List<String> subtractStock(int quantity){
+    public List<Stock> subtractStock(int quantity){
         if (this.stocks.size() < quantity) {
             throw new IllegalArgumentException("Insufficient stock");
         }
@@ -42,7 +42,7 @@ public class Product {
                 .limit(quantity)
                 .map(stock -> {
                     stock.setSold();
-                    return stock.getId();
+                    return stock;
                 }).toList();
     }
 

@@ -1,5 +1,6 @@
 package com.abc.mart.order.usecase;
 
+import com.abc.mart.coupon.service.CouponService;
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.member.domain.repository.MemberRepository;
 import com.abc.mart.order.domain.OrderItemState;
@@ -8,11 +9,13 @@ import com.abc.mart.product.domain.repository.ProductRepository;
 import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.product.domain.Product;
 import org.junit.jupiter.api.Test;
+import org.springframework.aop.scope.ScopedObject;
 
 import java.util.List;
 
 import static com.abc.mart.test.TestStubCreator.generateRandomStocks;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -21,8 +24,10 @@ class PlaceOrderUsecaseTest {
     MemberRepository memberRepository = mock(MemberRepository.class);
     OrderRepository orderRepository = mock(OrderRepository.class);
     ProductRepository productRepository = mock(ProductRepository.class);
+    CouponService couponService = mock(CouponService.class);
 
-    PlaceOrderUsecase placeOrderUsecase = new PlaceOrderUsecase(productRepository, memberRepository, orderRepository);
+    PlaceOrderUsecase placeOrderUsecase = new PlaceOrderUsecase(productRepository,
+            memberRepository, orderRepository,couponService);
 
     @Test
     public void placeOrderTest() {
@@ -49,6 +54,10 @@ class PlaceOrderUsecaseTest {
 
         when(memberRepository.findByMemberId(orderMemberId)).thenReturn(member);
         when(productRepository.findAllByProductIdAndIsAvailable(productIds, true)).thenReturn(products);
+        when(couponService.applyStockCouponAndReturnDiscountedAmount(anyString(), anyList(), anyLong()))
+                .thenReturn(5000L);
+        when(couponService.applyUniversalCouponAndReturnDiscountedAmount(anyString(), anyLong()))
+                .thenReturn(6000L);
 
         //when
         var result = placeOrderUsecase.placeOrder(orderRequest);
@@ -56,11 +65,11 @@ class PlaceOrderUsecaseTest {
         //then
         var resOrder = result.getLeft();
         var resProducts = result.getRight();
-        assertEquals(70000, resOrder.calculateTotalPrice());
+        assertEquals(54000, resOrder.calculateTotalPrice());
         assertEquals(OrderItemState.PREPARING, resOrder.getOrderItems().get(productId1).getOrderState());
         assertEquals(OrderItemState.PREPARING, resOrder.getOrderItems().get(productId2).getOrderState());
-        assertEquals(10000, resOrder.getOrderItems().get(productId1).getTotalPrice());
-        assertEquals(60000, resOrder.getOrderItems().get(productId2).getTotalPrice());
+        assertEquals(5000, resOrder.getOrderItems().get(productId1).getTotalPrice());
+        assertEquals(55000, resOrder.getOrderItems().get(productId2).getTotalPrice());
         assertEquals(9, resProducts.get(productId1).getStocks().stream().filter(s -> !s.isSold()).toList().size());
         assertEquals(2, resProducts.get(productId2).getStocks().stream().filter(s -> !s.isSold()).toList().size());
     }

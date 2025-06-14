@@ -2,6 +2,7 @@ package com.abc.mart.order.domain;
 
 import com.abc.mart.common.annotation.AggregateRoot;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,11 +20,13 @@ public class Order {
     private Map<String, OrderItem> orderItems;
     @Getter
     private OrderStatus orderStatus;
+    @Setter
+    private long universalDiscountPrice;
     private Customer customer;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static Order createOrder(List<OrderItem> orderItems, Customer customer) {
+    public static Order createOrder(List<OrderItem> orderItems, Customer customer, long universalDiscountPrice) {
         Order order = new Order();
         var now = LocalDateTime.now();
 
@@ -34,6 +37,7 @@ public class Order {
         order.customer = customer;
 
         order.orderStatus = OrderStatus.REQUESTED;
+        order.universalDiscountPrice = universalDiscountPrice;
 
         order.createdAt = now;
         order.updatedAt = now;
@@ -70,7 +74,8 @@ public class Order {
     }
 
     public long calculateTotalPrice() {
-        return this.orderItems.values().stream().mapToLong(OrderItem::getTotalPrice).sum();
+        return this.orderItems.values().stream().mapToLong(OrderItem::getTotalPrice).sum()
+                - this.universalDiscountPrice;
     }
 
     public void orderGetPaid() {

@@ -14,34 +14,37 @@ public class OrderItem {
     @Setter
     @Getter
     private String productId;
-    private Long orderedPrice; //snapshot of the price when the order was placed
     @Getter
     private int quantity;
 
+    private long regularPrice;
+
+    private long stockDiscountedAmount;
+
+    @Setter
     @Getter
     private List<String> stockIds;
     @Getter
     private OrderItemState orderState;
 
-    public static OrderItem of(Product product, int quantity){
+    public static OrderItem of(Product product, long regularPrice, int quantity){
         var orderItem = new OrderItem();
         orderItem.productId = product.getId();
-        orderItem.orderedPrice = product.getPrice();
         orderItem.quantity = quantity;
+        orderItem.regularPrice = regularPrice;
         orderItem.orderState = OrderItemState.PREPARING;
-
         return orderItem;
-    }
-
-    public void setStockIds(List<String> stockIds) {
-        this.stockIds = stockIds;
     }
 
     public void cancelOrderItem(){
         this.orderState = OrderItemState.CANCELLED;
     }
 
-    public Long getTotalPrice(){
-        return quantity * orderedPrice;
+    public void discounted(long amount){
+        stockDiscountedAmount = amount;
+    }
+
+    public long getTotalPrice(){
+        return regularPrice * quantity - stockDiscountedAmount;
     }
 }

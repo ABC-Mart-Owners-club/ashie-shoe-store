@@ -38,14 +38,14 @@ class PartialCancelOrderUsecaseTest {
 
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
-        var orderItem1 = OrderItem.of(products.get(0), 10);
+        var orderItem1 = OrderItem.of(products.get(0), 10000, 10);
         orderItem1.setStockIds(List.of("1","2", "3", "4", "5", "6", "7", "8", "9", "10"));
 
-        var orderItem2 = OrderItem.of(products.get(1), 3);
+        var orderItem2 = OrderItem.of(products.get(1), 20000, 3);
         orderItem2.setStockIds(List.of("2","3","4"));
 
         var order = Order.createOrder(
-                List.of(orderItem1, orderItem2), customer
+                List.of(orderItem1, orderItem2), customer, 5000
         );
 
         var now = LocalDateTime.now();

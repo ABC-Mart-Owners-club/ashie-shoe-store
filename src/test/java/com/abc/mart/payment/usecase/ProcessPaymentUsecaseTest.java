@@ -72,12 +72,12 @@ class ProcessPaymentUsecaseTest {
         var productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
 
         var orderItems = List.of(
-                        OrderItem.of(products.get(0), 10),
-                        OrderItem.of(products.get(1), 3)
+                        OrderItem.of(products.get(0), price1,10),
+                        OrderItem.of(products.get(1), price2, 3)
 
         );
 
-        var order = Order.createOrder(orderItems, customer);
+        var order = Order.createOrder(orderItems, customer, 0);
 
         when(orderRepository.findById(orderId)).thenReturn(order);
 

@@ -38,22 +38,22 @@ class CalculateSalesAmountUsecaseTest {
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
         var orderItems1 = List.of(
-                OrderItem.of(products.get(0), 10),
-                OrderItem.of(products.get(1), 3)
+                OrderItem.of(products.get(0), products.get(0).getPrice(), 10),
+                OrderItem.of(products.get(1), products.get(1).getPrice(), 3)
         );
-        var order1 = Order.createOrder(orderItems1, customer);
+        var order1 = Order.createOrder(orderItems1, customer, 5000);
 
         var orderItems2 = List.of(
-                OrderItem.of(products.get(0), 7),
-                OrderItem.of(products.get(1), 2)
+                OrderItem.of(products.get(0), products.get(0).getPrice(),7),
+                OrderItem.of(products.get(1), products.get(1).getPrice(),2)
         );
-        var order2 = Order.createOrder(orderItems2, customer);
+        var order2 = Order.createOrder(orderItems2, customer, 7000);
 
         var orderItems3 = List.of(
-                OrderItem.of(products.get(0), 6),
-                OrderItem.of(products.get(1), 2)
+                OrderItem.of(products.get(0), products.get(0).getPrice(),6),
+                OrderItem.of(products.get(1), products.get(1).getPrice(), 2)
         );
-        var order3 = Order.createOrder(orderItems3, customer);
+        var order3 = Order.createOrder(orderItems3, customer, 5000);
 
         var from = LocalDateTime.now().minusMonths(1);
         var to = LocalDateTime.now();

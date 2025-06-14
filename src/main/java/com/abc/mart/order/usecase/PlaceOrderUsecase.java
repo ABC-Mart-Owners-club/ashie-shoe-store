@@ -1,10 +1,12 @@
 package com.abc.mart.order.usecase;
 
+import com.abc.mart.coupon.service.CouponService;
 import com.abc.mart.member.domain.repository.MemberRepository;
 import com.abc.mart.order.domain.Customer;
 import com.abc.mart.order.domain.Order;
 import com.abc.mart.order.domain.OrderItem;
 import com.abc.mart.order.domain.repository.OrderRepository;
+import com.abc.mart.product.Stock;
 import com.abc.mart.product.domain.repository.ProductRepository;
 import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.product.domain.Product;
@@ -13,6 +15,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -23,6 +27,7 @@ public class PlaceOrderUsecase {
     private final ProductRepository productRepository;
     private final MemberRepository memberRepository;
     private final OrderRepository orderRepository;
+    private final CouponService couponService;
 
     @Transactional
     public Pair<Order, Map<String, Product>> placeOrder(OrderRequest orderRequest) {
@@ -34,7 +39,11 @@ public class PlaceOrderUsecase {
 
         var productMap = productRepository.findAllByProductIdAndIsAvailable(productIds, true).stream().collect(Collectors.toMap(Product::getId, p -> p));
 
-        var orderItems = orderRequest.orderItemRequestList().stream().map(orderItemRequest -> {
+        List<OrderItem> orderItems = new ArrayList<>();
+
+        var totalDiscountedAmount = 0L;
+
+        for(OrderRequest.OrderItemRequest orderItemRequest : orderRequest.orderItemRequestList()) {
             var product = productMap.get(orderItemRequest.productId());
 
             if (product == null) {
@@ -44,27 +53,30 @@ public class PlaceOrderUsecase {
 
             var quantity = orderItemRequest.quantity();
 
-            var orderItem = OrderItem.of(product, quantity);
+            var orderItem = OrderItem.of(product, product.getPrice(), quantity);
 
             var orderedProduct = productMap.get(orderItem.getProductId());
-            var soldStockIds = orderedProduct.subtractStock(orderItem.getQuantity());
-            orderItem.setStockIds(soldStockIds);
+            var soldStocks = orderedProduct.subtractStock(orderItem.getQuantity());
+
+            //if stock coupon is available, apply it
+            var stockDiscountAmount = couponService.applyStockCouponAndReturnDiscountedAmount(customer.getMemberId(),
+                    soldStocks, orderedProduct.getPrice());
+            orderItem.setStockIds(soldStocks.stream().map(Stock::getId).toList());
+            totalDiscountedAmount += stockDiscountAmount;
+            orderItem.discounted(stockDiscountAmount);
 
             productRepository.save(orderedProduct);
 
-            return orderItem;
-        }).toList();
+            orderItems.add(orderItem);
+        }
 
-        var order = Order.createOrder(orderItems, customer);
+        //if seller coupon is available, apply it
+        var beforeUniversalCouponAppliedPrice = orderItems.stream().mapToLong(OrderItem::getTotalPrice).sum();
 
-
+        var order = Order.createOrder(orderItems, customer, couponService.applyUniversalCouponAndReturnDiscountedAmount(customer.getMemberId(), beforeUniversalCouponAppliedPrice));
 
         orderRepository.placeOrder(order);
 
-        orderItems.forEach(orderItem ->
-        {
-
-        });
         return Pair.of(order, productMap);
     }
 
