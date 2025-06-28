@@ -5,35 +5,44 @@ import com.abc.mart.product.domain.Product;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @ValueObject
 //Has the same lifecycle with Order entity
 public class OrderItem {
 
+    @Getter
+    private String id;
+
     @Setter
     @Getter
     private String productId;
-    private Long orderedPrice; //snapshot of the price when the order was placed
     @Getter
     private int quantity;
 
+    private long orderedPrice;
+
+    @Setter
     @Getter
-    private OrderState orderState;
+    private List<String> stockIds;
+    @Getter
+    private OrderItemState orderState;
 
-    public static OrderItem of(Product product, int quantity){
+    public static OrderItem of(Product product, long orderedPrice, int quantity){
         var orderItem = new OrderItem();
+        orderItem.id = "orderitem" + product.getId() + System.currentTimeMillis();
         orderItem.productId = product.getId();
-        orderItem.orderedPrice = product.getPrice();
         orderItem.quantity = quantity;
-        orderItem.orderState = OrderState.PREPARING;
-
+        orderItem.orderedPrice = orderedPrice;
+        orderItem.orderState = OrderItemState.PREPARING;
         return orderItem;
     }
 
     public void cancelOrderItem(){
-        this.orderState = OrderState.CANCELLED;
+        this.orderState = OrderItemState.CANCELLED;
     }
 
-    public Long getTotalPrice(){
-        return quantity * orderedPrice;
+    public long getTotalPrice(){
+        return orderedPrice * quantity;
     }
 }

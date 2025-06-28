@@ -3,7 +3,6 @@ package com.abc.mart.payment.usecase;
 import com.abc.mart.member.domain.Member;
 import com.abc.mart.order.domain.*;
 import com.abc.mart.order.domain.repository.OrderRepository;
-import com.abc.mart.order.usecase.dto.OrderRequest;
 import com.abc.mart.payment.domain.PaymentHistory;
 import com.abc.mart.payment.domain.PaymentMethod;
 import com.abc.mart.payment.domain.PaymentProcessState;
@@ -21,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.abc.mart.test.TestStubCreator.generateRandomStocks;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -65,17 +65,19 @@ class ProcessPaymentUsecaseTest {
         var price2 = 20000;
 
         var orderMemberId = "memberId";
-        var products = List.of(Product.of(productId1, "productName", price1), Product.of(productId2, "productName", price2));
+        var products = List.of(Product.of(productId1, "productName", price1, generateRandomStocks(10), true),
+                Product.of(productId2, "productName", price2, generateRandomStocks(20), true));
         var customer = Customer.from(Member.of(orderMemberId, "memberName", "email", "phoneNum"));
 
         var productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
 
-        var orderItemRequests = List.of(
-                new OrderRequest.OrderItemRequest(products.get(0).getId(), 10, 1),
-                new OrderRequest.OrderItemRequest(products.get(1).getId(), 3, 2)
+        var orderItems = List.of(
+                        OrderItem.of(products.get(0), price1,10),
+                        OrderItem.of(products.get(1), price2, 3)
+
         );
 
-        var order = Order.createOrder(customer, productMap, orderItemRequests);
+        var order = Order.createOrder(orderItems, customer);
 
         when(orderRepository.findById(orderId)).thenReturn(order);
 
