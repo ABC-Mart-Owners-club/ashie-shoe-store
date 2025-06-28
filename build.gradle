@@ -24,10 +24,14 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.redisson:redisson-spring-boot-starter:3.27.0'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework:spring-tx'
     implementation 'org.springframework:spring-aop'
     implementation 'org.apache.commons:commons-lang3:3.12.0'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

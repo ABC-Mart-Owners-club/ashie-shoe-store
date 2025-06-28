@@ -1,5 +1,6 @@
 package com.abc.mart.order.usecase;
 
+import com.abc.mart.common.annotation.RedissonLock;
 import com.abc.mart.coupon.domain.CouponRepository;
 import com.abc.mart.coupon.service.CouponService;
 import com.abc.mart.member.domain.repository.MemberRepository;
